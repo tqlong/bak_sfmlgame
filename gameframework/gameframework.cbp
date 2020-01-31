@@ -15,6 +15,7 @@
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -26,6 +27,7 @@
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -46,8 +48,10 @@
 		</Linker>
 		<Unit filename=".gitignore" />
 		<Unit filename="include/game.h" />
+		<Unit filename="include/gameevent.h" />
 		<Unit filename="include/gameobject.h" />
 		<Unit filename="src/game.cpp" />
+		<Unit filename="src/gameevent.cpp" />
 		<Unit filename="src/gameobject.cpp" />
 		<Extensions>
 			<code_completion />
