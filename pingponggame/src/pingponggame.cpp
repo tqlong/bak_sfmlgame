@@ -5,8 +5,8 @@
 
 using namespace std;
 
-PingPongGame::PingPongGame(std::string name, int nBall, float baseRadius)
-    : Game(name), m_currentTime(0.f), m_nBall(nBall), m_baseRadius(baseRadius)
+PingPongGame::PingPongGame(std::string name, int nBall, float baseRadius, float wantedFPS)
+    : Game(name), m_currentTime(0.f), m_nBall(nBall), m_baseRadius(baseRadius), m_wantedFPS(wantedFPS)
 {
 
 }
@@ -45,38 +45,26 @@ void PingPongGame::loop()
     float oldTime = m_currentTime;
     int n = 0;
     float elapsed = 0.f;
-    float wantedFPS = 100.0f;
-    float timeIncrement = 1.0 / wantedFPS;
-    while (m_window.isOpen())
-    {
+    float timeIncrement = 1.0 / m_wantedFPS;
+    while (m_window.isOpen()) {
         sf::Clock clock;
-        //this->printStatus();
         sf::Event event;
-        while (m_window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                m_window.close();
-        }
-
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            //sf::Vector2i localPosition = sf::Mouse::getPosition(m_window);
-            //m_pBall->setPosition(localPosition.x, localPosition.y);
+        while (m_window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) m_window.close();
         }
 
         step(timeIncrement);
         renderGame();
 
         float currentLoopTime = clock.getElapsedTime().asSeconds();
-        if (currentLoopTime < timeIncrement) elapsed += timeIncrement;
-        else elapsed += currentLoopTime;
+        elapsed += (currentLoopTime < timeIncrement) ? timeIncrement : currentLoopTime;
 
         n++;
 //        cout << "queue " << m_eventQueue.size() << endl;
         if (m_currentTime > oldTime + 1.f) {
             oldTime = m_currentTime;
-            cout << "check queue " << m_eventQueue.size() << " real fps " << (float(n)/elapsed) << " wantedFPS " << wantedFPS << endl;
+            cout << "check queue " << m_eventQueue.size() << " real fps " << (float(n)/elapsed) << " wantedFPS " << m_wantedFPS << endl;
             n = 0, elapsed = 0.f;
-//            break;
         }
         while (clock.getElapsedTime().asSeconds() < timeIncrement) { }
     }
@@ -88,25 +76,16 @@ void PingPongGame::step(float dt)
     float nextTime = m_currentTime + dt;
 
     while (!m_eventQueue.empty()) {
-        Event e = m_eventQueue.top();
-        if (!e.isValid()) {
-//            cout << "event invalid " << e.m_t << " " << m_eventQueue.size() << endl;
+        auto e = m_eventQueue.top();
+        if (!e->isValid()) {
             m_eventQueue.pop();
         } else {
-            if (e.m_t > nextTime) { // event is too far in future, move all particles to nextTime
+            if (e->getTime() > nextTime) { // event is too far in future, move all particles to nextTime
                 break; // get out of the loop to render
             } else { // event happens inside [m_currentTime, nextTime]
-//                cout << "event " << e.m_t << " " << m_currentTime << " " << nextTime << " " << m_eventQueue.size() << endl;
-                moveBalls(e.m_t-m_currentTime);
-
-                ptrPingPongBall pA = e.pA.lock(), pB = e.pB.lock();
-                if (pA && pB) pA->bounceOff(pB);
-                else if (pA && !pB) pA->bounceOffVerticalWall();
-                else if (!pA && pB) pB->bounceOffHorizontalWall();
-                else {}
+                moveBalls(e->getTime()-m_currentTime);
                 m_eventQueue.pop(); // remove this event to process next event
-                predict(pA);
-                predict(pB);
+                e->getConsequences();
             }
         }
     }
@@ -114,28 +93,21 @@ void PingPongGame::step(float dt)
     if (m_currentTime < nextTime) moveBalls(nextTime-m_currentTime);
 }
 
-bool operator< (const Event& a, const Event& b) {
-    return a.m_t > b.m_t;
-}
-
 void PingPongGame::predict(ptrPingPongBall pBall, float limit)
 {
     if (!pBall) return;
 
     for (auto pThat : m_balls) {
-
         float dt = pBall->getTimeToHit(pThat);
         if (dt > 0 && m_currentTime+dt < limit) {
-            m_eventQueue.push(Event(m_currentTime+dt, pBall, pThat));
-            m_eventQueue.push(Event(m_currentTime+dt, pThat, pBall));
+            m_eventQueue.push(make_shared<Event>(m_currentTime+dt, pBall, pThat));
         }
-
     }
 
     double dtX = pBall->getTimeToHitVerticalWall();
     double dtY = pBall->getTimeToHitHorizontalWall();
-    if (dtX > 0 && m_currentTime + dtX < limit) m_eventQueue.push(Event(m_currentTime + dtX, pBall, nullptr));
-    if (dtY > 0 && m_currentTime + dtY < limit) m_eventQueue.push(Event(m_currentTime + dtY, nullptr, pBall));
+    if (dtX > 0 && m_currentTime + dtX < limit) m_eventQueue.push(make_shared<Event>(m_currentTime + dtX, pBall, nullptr));
+    if (dtY > 0 && m_currentTime + dtY < limit) m_eventQueue.push(make_shared<Event>(m_currentTime + dtY, nullptr, pBall));
 }
 
 void PingPongGame::moveBalls(float dt)
@@ -145,7 +117,31 @@ void PingPongGame::moveBalls(float dt)
         sf::Vector2f pos = pos_velo.first, velo = pos_velo.second;
         ball->setPosition(pos.x, pos.y);
         ball->setVelocity(velo.x, velo.y);
-//        ball->printStatus();
     }
     m_currentTime += dt;
+}
+
+Event::Event(float t, ptrPingPongBall a, ptrPingPongBall b) : GameEvent(t), pA(a), pB(b) {
+    cA = a ? a->getCount() : -1;
+    cB = b ? b->getCount() : -1;
+}
+
+bool Event::isValid() const {
+    auto a = pA.lock(), b = pB.lock();
+    if (a && a->getCount() != cA) return false;
+    if (b && b->getCount() != cB) return false;
+    return true;
+}
+
+void Event::getConsequences() {
+    ptrPingPongBall pA = this->pA.lock(), pB = this->pB.lock();
+    if (pA && pB) pA->bounceOff(pB);
+    else if (pA && !pB) pA->bounceOffVerticalWall();
+    else if (!pA && pB) pB->bounceOffHorizontalWall();
+    else {}
+    auto game = pA ? std::dynamic_pointer_cast<PingPongGame>(pA->getGame()) : (pB ? std::dynamic_pointer_cast<PingPongGame>(pB->getGame()) : nullptr);
+    if (game) {
+        game->predict(pA);
+        game->predict(pB);
+    }
 }

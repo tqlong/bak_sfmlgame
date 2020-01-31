@@ -18,11 +18,11 @@ class GameObject
 
         void setID(int id) { m_id = id; }
         int getID() const { return m_id; }
+        std::shared_ptr<Game> getGame() const { return m_pGame.lock(); }
     protected:
         std::weak_ptr<Game> m_pGame;
         int m_id;
 
-        std::shared_ptr<Game> getGame() const { return m_pGame.lock(); }
     private:
 };
 
