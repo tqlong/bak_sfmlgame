@@ -13,7 +13,6 @@ PingPongGame::PingPongGame(std::string name, int nBall, float baseRadius, float 
 
 PingPongGame::~PingPongGame()
 {
-    //dtor
 }
 
 void PingPongGame::createGame(std::shared_ptr<Game> pGame)
@@ -43,8 +42,7 @@ void PingPongGame::createGame(std::shared_ptr<Game> pGame)
 void PingPongGame::loop()
 {
     float oldTime = m_currentTime;
-    int n = 0;
-    float elapsed = 0.f;
+    float n = 0, elapsed = 0.f;
     float timeIncrement = 1.0 / m_wantedFPS;
     while (m_window.isOpen()) {
         sf::Clock clock;
@@ -57,13 +55,11 @@ void PingPongGame::loop()
         renderGame();
 
         float currentLoopTime = clock.getElapsedTime().asSeconds();
-        elapsed += (currentLoopTime < timeIncrement) ? timeIncrement : currentLoopTime;
+        n += 1, elapsed += (currentLoopTime < timeIncrement) ? timeIncrement : currentLoopTime;
 
-        n++;
-//        cout << "queue " << m_eventQueue.size() << endl;
-        if (m_currentTime > oldTime + 1.f) {
+        if (m_currentTime > oldTime + 5.f) {
             oldTime = m_currentTime;
-            cout << "check queue " << m_eventQueue.size() << " real fps " << (float(n)/elapsed) << " wantedFPS " << m_wantedFPS << endl;
+            cout << "check queue " << m_eventQueue.size() << " real fps " << n/elapsed << " wantedFPS " << m_wantedFPS << endl;
             n = 0, elapsed = 0.f;
         }
         while (clock.getElapsedTime().asSeconds() < timeIncrement) { }
