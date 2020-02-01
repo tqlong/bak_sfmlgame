@@ -35,13 +35,6 @@ void PingPongGame::createGame(std::shared_ptr<Game> pGame)
         pGame->registerObject(ball);
     }
 
-    uniform_real_distribution<float> rock_size_distribution(0.1f, 0.2f);
-    m_rock = make_shared<Rock>(pGame);
-    m_rock->setSize(rock_size_distribution(generator));
-    m_rock->setPosition(0.5f, 0.5f);
-    m_rock->setColor(sf::Color::Cyan);
-    pGame->registerObject(m_rock);
-
     for (auto ball : m_balls) predict(ball);
     cout << "Event queue prepared " << m_eventQueue.size() << endl;
 }
@@ -51,14 +44,12 @@ void PingPongGame::loop()
     float oldTime = m_currentTime;
     float n = 0, elapsed = 0.f;
     float timeIncrement = 1.0 / m_wantedFPS;
-    m_rock->startClock();
     while (m_window.isOpen()) {
         sf::Clock clock;
         sf::Event event;
         while (m_window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) m_window.close();
         }
-        processMouseStatus();
 
         step(timeIncrement);
         renderGame();
@@ -148,16 +139,5 @@ void Event::getConsequences() {
     if (game) {
         game->predict(pA);
         game->predict(pB);
-    }
-}
-
-void PingPongGame::processMouseStatus()
-{
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-        sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
-        sf::Vector2u winSize = m_window.getSize();
-        int x = mousePos.x, y = mousePos.y;
-        int w = winSize.x, h = winSize.y;
-        m_rock->setPosition((float)x/w, (float)y/h);
     }
 }

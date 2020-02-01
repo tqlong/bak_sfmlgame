@@ -59,7 +59,7 @@ void PingPongBall::setMass(float mass)
 
 void PingPongBall::printStatus() const
 {
-    cout << "ball id " << m_id << " x " << m_x << " y " << m_y << " vx " << m_vx << " vy " << m_vy << endl;
+    cout << "id " << m_id << " x " << m_x << " y " << m_y << " vx " << m_vx << " vy " << m_vy << endl;
 }
 
 pair<sf::Vector2f, sf::Vector2f> PingPongBall::getPredictedPosition(float dt) const

@@ -26,7 +26,7 @@ class Game
     protected:
         sf::RenderWindow m_window;
         std::string m_name;
-        std::unordered_map<int, std::weak_ptr<GameObject>> m_objects;
+        std::vector<std::weak_ptr<GameObject>> m_objects;
 
         void renderGame();
     private:

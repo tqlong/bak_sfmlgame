@@ -4,7 +4,6 @@
 #include "game.h"
 #include "pingpongball.h"
 #include "gameevent.h"
-#include "Rock.h"
 #include <vector>
 #include <queue>
 #include <limits>
@@ -21,7 +20,6 @@ public:
 protected:
 
     std::vector<ptrPingPongBall> m_balls;
-    ptrRock m_rock;
     GameEventQueue m_eventQueue;
     float m_currentTime;
     int m_nBall;
@@ -31,8 +29,6 @@ private:
     void step(float dt);
     void predict(ptrPingPongBall, float limit = std::numeric_limits<float>::infinity());
     void moveBalls(float dt);
-
-    void processMouseStatus();
 
     friend class Event;
 };

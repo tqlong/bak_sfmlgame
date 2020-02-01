@@ -13,7 +13,7 @@ class GameObject
         GameObject(std::shared_ptr<Game> pGame);
         virtual ~GameObject();
 
-        virtual void draw(sf::RenderWindow& window) const {}
+        virtual void draw(sf::RenderWindow& window) const = 0;
         virtual void printStatus() const;
 
         void setID(int id) { m_id = id; }

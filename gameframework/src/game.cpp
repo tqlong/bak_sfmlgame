@@ -16,14 +16,14 @@ void Game::registerObject(std::shared_ptr<GameObject> pObject)
     int id = m_nObject;
     m_nObject++;
 
-    m_objects[id] = pObject;
+    m_objects.push_back(pObject);
     pObject->setID(id);
 }
 
 void Game::printStatus() const
 {
     for (const auto& p : m_objects) {
-        auto pObject = p.second.lock();
+        auto pObject = p.lock();
         if (pObject)
             pObject->printStatus();
     }
@@ -34,9 +34,11 @@ void Game::renderGame()
     m_window.clear();
 
     for (const auto& p : m_objects) {
-        auto pObject = p.second.lock();
-        if (pObject)
+        auto pObject = p.lock();
+        if (pObject) {
+//            pObject->printStatus();
             pObject->draw(m_window);
+        }
     }
 
     m_window.display();

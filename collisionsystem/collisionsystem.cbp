@@ -2,30 +2,32 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="pingponggame" />
+		<Option title="collisionsystem" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/pingponggame" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Debug/collisionsystem" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add directory="../gameframework/bin/Debug" />
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/pingponggame" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release/collisionsystem" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-std=c++11" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -48,11 +50,9 @@
 			<Add directory="../SFML-2.5.1/lib" />
 		</Linker>
 		<Unit filename=".gitignore" />
-		<Unit filename="include/Rock.h" />
 		<Unit filename="include/pingpongball.h" />
 		<Unit filename="include/pingponggame.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="src/Rock.cpp" />
 		<Unit filename="src/pingpongball.cpp" />
 		<Unit filename="src/pingponggame.cpp" />
 		<Extensions>

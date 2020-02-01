@@ -5,5 +5,8 @@
 			<Depends filename="gameframework/gameframework.cbp" />
 		</Project>
 		<Project filename="gameframework/gameframework.cbp" />
+		<Project filename="collisionsystem/collisionsystem.cbp">
+			<Depends filename="gameframework/gameframework.cbp" />
+		</Project>
 	</Workspace>
 </CodeBlocks_workspace_file>
